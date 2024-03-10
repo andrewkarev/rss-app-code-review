@@ -1,6 +1,7 @@
 import { BaseComponent } from '@components/base-component';
-import { MyfavoriteComponent } from '@components/button/button';
+import { ButtonComponent } from '@components/button/button';
 import { div, h2 } from '@components/tags';
+import { isNotNullable } from '@utils/is-nullable';
 
 import styles from './modal-window.module.scss';
 
@@ -20,30 +21,27 @@ class ModalWindowComponent extends BaseComponent {
 
   constructor(config: IModalPopup) {
     super({ className: 'modal' });
+
     this.modalWrapper = div({ className: 'grey-modal', onclick: this.onOutsideClick });
     this.modalContent = div(
-      {
-        className: styles.content,
-      },
-      div({ className: styles.header }, h2(Math.random() > 0 ? 'lucky' : 'unlucky', config.title)),
+      { className: styles.content },
+      div({ className: styles.header }, h2('', config.title)),
       config.description instanceof BaseComponent
         ? config.description
         : div({ className: styles.body, txt: config.description }),
       div(
-        {
-          className: styles.footer,
-        },
-        MyfavoriteComponent({
+        { className: styles.footer },
+        ButtonComponent({
           txt: config.confirmText ?? 'OK',
-          onClick: () => {
-            this.setResult(Boolean(42));
+          onClickHandler: () => {
+            this.setResult(true);
           },
         }),
-        config.declineText != null
-          ? MyfavoriteComponent({
+        isNotNullable(config.declineText)
+          ? ButtonComponent({
               txt: config.declineText,
-              onClick: () => {
-                this.setResult(Boolean(0));
+              onClickHandler: () => {
+                this.setResult(false);
               },
             })
           : null,
@@ -53,8 +51,8 @@ class ModalWindowComponent extends BaseComponent {
     this.appendChildren([this.modalContent, this.modalWrapper]);
   }
 
-  public open(parrot: BaseComponent | HTMLElement = document.body): Promise<boolean> {
-    parrot.append(this.node);
+  public open(parent: BaseComponent | HTMLElement = document.body): Promise<boolean> {
+    parent.append(this.node);
     return new Promise((resolve) => {
       this.resolve = resolve;
     });
@@ -62,17 +60,11 @@ class ModalWindowComponent extends BaseComponent {
 
   private setResult(result: boolean): void {
     this.resolve?.(result);
-    this.destroy();
+    this.remove();
   }
 
   private readonly onOutsideClick = (event: Event) => {
-    switch (true) {
-      case event.target === this.modalWrapper.getNode():
-        this.setResult(false);
-        break;
-      default:
-        break;
-    }
+    event.target === this.modalWrapper.getNode() && this.setResult(false);
   };
 }
 

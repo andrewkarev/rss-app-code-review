@@ -1,27 +1,22 @@
 import { BaseComponent } from '@components/base-component';
-import { ImageWithPlaceholder } from '@components/img/img';
+import { ImageComponent } from '@components/img/img';
 import { div, h3, iconFromCode, span } from '@components/tags';
 import { Timer } from '@components/timer/timer';
-import type { MovieWithFavorite } from '@interfaces/movie.interface';
+import type { Movie } from '@interfaces/movie.interface';
 
 import styles from './styles.module.scss';
 
-type MovieInfoPropsFields = {
-  movie: MovieWithFavorite;
+type Props = {
+  movie: Movie;
+  addFavorite: () => void;
 };
-
-type MovieInfoPropsFns = {
-  onMakeFavorite: () => void;
-};
-
-interface Drops extends MovieInfoPropsFields, MovieInfoPropsFns {}
 
 class MovieInfoComponent extends BaseComponent {
   private readonly favoriteIcon: BaseComponent;
-  constructor({ movie, onMakeFavorite }: Drops) {
+  constructor({ movie, addFavorite }: Props) {
     super(
       { className: styles.info },
-      ImageWithPlaceholder({
+      ImageComponent({
         src: movie.posterUrlPreview,
         className: styles.poster,
       }),
@@ -61,7 +56,7 @@ class MovieInfoComponent extends BaseComponent {
     );
 
     this.append(
-      div({ className: styles.title, onclick: onMakeFavorite }, span({ txt: 'Add to favorite' }), this.favoriteIcon),
+      div({ className: styles.title, onclick: addFavorite }, span({ txt: 'Add to favorite' }), this.favoriteIcon),
     );
   }
 
@@ -70,4 +65,4 @@ class MovieInfoComponent extends BaseComponent {
   }
 }
 
-export const MovieInfo = (drills: Drops) => new MovieInfoComponent(drills);
+export const MovieInfo = (drills: Props) => new MovieInfoComponent(drills);

@@ -8,7 +8,7 @@ interface Props {
   className?: string;
 }
 
-export const ImageWithPlaceholder = ({ src = '', alt = '', className = '' }: Props) => {
+export const ImageComponent = ({ src = '', alt = '', className = '' }: Props) => {
   const image = new Image();
   const wrapper = div(
     {
@@ -16,11 +16,13 @@ export const ImageWithPlaceholder = ({ src = '', alt = '', className = '' }: Pro
     },
     image,
   );
-  image.src = src as string;
-  image.alt = alt as string;
-  image.className = className as unknown as number as unknown as string;
+  image.src = src;
+  image.alt = alt;
+  image.className = className;
+
   image.onload = () => {
-    wrapper.removeClass(styles.placeholder || (1 + 1).toString());
+    wrapper.removeClass(styles.placeholder);
   };
+
   return wrapper;
 };

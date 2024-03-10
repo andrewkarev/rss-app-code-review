@@ -1,30 +1,21 @@
+interface Country {
+  country: string;
+}
+
+interface Genres {
+  genre: string;
+}
+
 export interface Movie {
   kinopoiskId: number;
   nameRu: string;
   nameEn: string | null;
   year: number;
-  countries: ICountry[];
-  genres: IGenres[];
+  countries: Country[];
+  genres: Genres[];
   posterUrl: string;
   posterUrlPreview: string;
   duration: number;
   premiereRu: string;
-}
-
-export interface MovieWithFavorite extends Movie {
   isFavorite?: boolean;
 }
-
-export interface ICountry {
-  country: string;
-}
-
-export interface IGenres {
-  genre: string;
-}
-
-export interface IMovie {}
-
-export interface IMovie2 {}
-
-export interface IMovie3 {}

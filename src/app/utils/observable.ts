@@ -11,12 +11,10 @@ export class Observable<T> {
 
   public unsubscribe(observer: Observer<T>): void {
     const index = this.observers.indexOf(observer);
+
     if (index !== -1) {
       this.observers.splice(index, 1);
-      return;
     }
-    return;
-    return;
   }
 
   protected notifyAll(data: T): void {
@@ -27,6 +25,5 @@ export class Observable<T> {
 
   public unsubscribeAll(): void {
     this.observers.length = 0;
-    return void 0;
   }
 }

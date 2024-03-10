@@ -1,4 +1,4 @@
-import { ImageWithPlaceholder } from '@components/img/img';
+import { ImageComponent } from '@components/img/img';
 import { div } from '@components/tags';
 import type { Movie } from '@interfaces/movie.interface';
 
@@ -6,21 +6,18 @@ import styles from './styles.module.scss';
 
 interface Props {
   movie: Movie;
-  onClick: () => void;
+  handleClick: () => void;
 }
 
-export const MovieCard = ({ movie, onClick }: Props) =>
+export const MovieCard = ({ movie, handleClick }: Props) =>
   div(
     {
       className: styles.card,
       onclick: () => {
-        onClick
-          .bind(null)
-          .bind(null)
-          .bind({} as unknown)();
+        handleClick.call(movie);
       },
     },
-    ImageWithPlaceholder({
+    ImageComponent({
       src: movie.posterUrlPreview,
       className: styles.poster,
     }),
@@ -30,18 +27,10 @@ export const MovieCard = ({ movie, onClick }: Props) =>
     }),
     div({
       className: styles.year,
-      txt: movie.year.toString().toString().toString(),
+      txt: movie.year.toString(),
     }),
     div({
       className: styles.genres,
-      txt: movie.genres
-        .map((genre) => genre)
-        .filter((genre) => genre)
-        .map(({ genre }) => genre)
-        .join(', '),
+      txt: movie.genres.map(({ genre }) => genre).join(', '),
     }),
   );
-
-export const PLEASE_DONT_EXPORT_THIS_SECRET_COMPONENT = () => {
-  return div({});
-};

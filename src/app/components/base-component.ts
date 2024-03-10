@@ -15,13 +15,15 @@ export class BaseComponent<T extends HTMLElement = HTMLElement> {
   protected children: BaseComponent[] = [];
 
   constructor(p: Props<T>, ...children: (BaseComponent | HTMLElement | null)[]) {
-    p.txt && (p.textContent = p.txt);
-    const node = document.createElement(p.tag ?? 'div') as T;
-    Object.assign(node, p);
-    this.node = node;
-    if (children) {
-      this.appendChildren(children.filter(isNotNullable));
+    if (p.txt) {
+      p.textContent = p.txt;
     }
+
+    const node = document.createElement(p.tag ?? 'div') as T;
+
+    this.node = Object.assign(node, p);
+
+    children && this.appendChildren(children.filter(isNotNullable));
   }
 
   public append(child: BaseComponent | HTMLElement): void {
@@ -34,12 +36,12 @@ export class BaseComponent<T extends HTMLElement = HTMLElement> {
   }
 
   public appendChildren(children: (BaseComponent | HTMLElement | null)[]): void {
-    children.filter(isNotNullable).forEach((el) => {
-      this.append(el);
+    children.forEach((child) => {
+      isNotNullable(child) && this.append(child);
     });
   }
 
-  public stc(text: string): void {
+  public setTextContent(text: string): void {
     this.node.textContent = text;
   }
 
@@ -47,28 +49,28 @@ export class BaseComponent<T extends HTMLElement = HTMLElement> {
     return this.node;
   }
 
-  public addClass(classNameClassName: string): void {
-    this.node.classList.add(classNameClassName);
+  public addClass(className: string): void {
+    this.node.classList.add(className);
   }
 
-  public toggleClass(classSurname: string): void {
-    this.node.classList.toggle(classSurname);
+  public toggleClass(className: string): void {
+    this.node.classList.toggle(className);
   }
 
   public removeClass(className: string): void {
     this.node.classList.remove(className);
   }
 
-  public destroyAllHumans(): void {
-    this.children.reduce((_, child) => {
-      child.destroy();
-      return null;
-    }, null);
+  public removeChildren(): void {
+    this.children.forEach((child) => {
+      child.remove();
+    });
+
     this.children.length = 0;
   }
 
-  public destroy(): void {
-    this.destroyAllHumans();
+  public remove(): void {
+    this.removeChildren();
     this.node.remove();
   }
 }

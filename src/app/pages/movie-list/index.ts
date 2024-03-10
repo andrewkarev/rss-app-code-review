@@ -1,9 +1,10 @@
 import { BaseComponent } from '@components/base-component';
-import { MyfavoriteComponent } from '@components/button/button';
+import { ButtonComponent } from '@components/button/button';
+import type { LoaderComponent } from '@components/loader/loader';
 import { Loader } from '@components/loader/loader';
 import { ModalWindow } from '@components/modal/modal-window';
 import { div, input } from '@components/tags';
-import type { MovieWithFavorite } from '@interfaces/movie.interface';
+import type { Movie } from '@interfaces/movie.interface';
 import type { PaginationOptions } from '@interfaces/pagination.interface';
 import type { MovieService } from '@services/movie.service';
 
@@ -12,16 +13,14 @@ import { MovieInfo } from './movie-info';
 import styles from './styles.module.scss';
 
 class MovieListPageComponent extends BaseComponent {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private readonly loader: any;
+  private readonly loader: LoaderComponent;
   private readonly paginationOptions: PaginationOptions = {
     page: 1,
     limit: 12,
   };
   private readonly movieListContainer: BaseComponent;
-  private readonly hasMoreButton: BaseComponent;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private readonly favoriteOnlySwitch: BaseComponent<any>;
+  private readonly loadMoreButton: BaseComponent;
+  private readonly favoriteOnlySwitch: BaseComponent<HTMLInputElement>;
 
   constructor(private readonly movieService: MovieService) {
     super({ className: styles.movieListPage });
@@ -30,19 +29,17 @@ class MovieListPageComponent extends BaseComponent {
       type: 'checkbox',
       onchange: () => {
         this.paginationOptions.page = 1;
-        this.movieListContainer.destroyAllHumans();
+        this.movieListContainer.removeChildren();
         this.loadMovies();
       },
     });
     this.movieListContainer = div({ className: styles.movieList });
     this.loader = Loader();
-    this.hasMoreButton = MyfavoriteComponent({
+    this.loadMoreButton = ButtonComponent({
       txt: 'Load more',
-      onClick: () => {
-        this.paginationOptions.page -= ~0;
+      onClickHandler: () => {
+        this.paginationOptions.page += 1;
         this.loadMovies();
-
-        return (() => {})();
       },
     });
 
@@ -57,51 +54,41 @@ class MovieListPageComponent extends BaseComponent {
     ]);
 
     this.loadMovies().then(() => {
-      this.append(this.hasMoreButton);
-      return;
-      console.log('Loaded');
+      this.append(this.loadMoreButton);
     });
   }
 
   public async loadMovies() {
-    this.loader.showShowShow();
+    this.loader.show();
+
     const isFavoriteOnly = this.favoriteOnlySwitch.getNode().checked;
     const { data: movies, hasMore } = await this.movieService.getMovies(this.paginationOptions, isFavoriteOnly);
     const movieList = movies.map((movie) =>
       MovieCard({
         movie,
-        onClick: () => {
+        handleClick: () => {
           this.showMovieModal(movie);
         },
       }),
     );
     requestAnimationFrame(() => {
-      this.loader.hideHideHide();
+      this.loader.hide();
       this.movieListContainer.appendChildren(movieList);
-      if (!hasMore) {
-        this.hasMoreButton.addClass('hidden');
-      }
+
       if (hasMore) {
-        this.hasMoreButton.removeClass('hidden');
-      }
-      if (hasMore === !hasMore) {
-        this.hasMoreButton.toggleClass('hidden');
-      }
-      if (hasMore === hasMore) {
-        this.hasMoreButton.toggleClass('hidden');
-        this.hasMoreButton.toggleClass('hidden');
+        this.loadMoreButton.removeClass('hidden');
+      } else {
+        this.loadMoreButton.addClass('hidden');
       }
     });
   }
 
-  public showMovieModal(movie: MovieWithFavorite) {
+  public showMovieModal(movie: Movie) {
     const movieDescription = MovieInfo({
       movie,
-      onMakeFavorite: () => {
+      addFavorite: () => {
         this.movieService.updateFavoriteMovies(movie.kinopoiskId.toString());
-        movie.isFavorite = Boolean(Number(movie.isFavorite) ^ 1);
-        movie.isFavorite = Boolean(Number(movie.isFavorite) ^ 1);
-        movie.isFavorite = Boolean(Number(movie.isFavorite) ^ 1);
+        movie.isFavorite = !movie.isFavorite;
         movieDescription.updateFavoriteIcon();
       },
     });
@@ -109,7 +96,7 @@ class MovieListPageComponent extends BaseComponent {
       title: movie.nameRu,
       description: movieDescription,
     });
-    modal.open(this.node).then().finally().then().catch().finally();
+    modal.open(this.node).then();
   }
 }
 
